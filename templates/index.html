@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AgriEscrow · Staged escrow for farm produce</title>
+  <meta name="description" content="Decentralised escrow payments for agricultural orders on Ethereum Sepolia.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>">
+</head>
+<body>
+  <!-- ============ Header ============ -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">🌾</span>
+      <div>
+        <h1>AgriEscrow</h1>
+        <p class="brand-sub">Staged escrow payments for farm produce</p>
+      </div>
+    </div>
+
+    <div class="wallet">
+      <span id="networkPill" class="pill pill-muted" title="Network">Not connected</span>
+      <div id="accountChip" class="account-chip hidden">
+        <span id="roleTag" class="role-tag">Trader</span>
+        <span id="accountAddr" class="mono"></span>
+        <span id="accountBal" class="muted"></span>
+      </div>
+      <button id="connectBtn" class="btn btn-primary">Connect MetaMask</button>
+    </div>
+  </header>
+
+  <div id="banner" class="banner hidden" role="status"></div>
+
+  <main class="layout">
+    <!-- ============ Stats ============ -->
+    <section class="stats" aria-label="Platform statistics">
+      <div class="stat"><span class="stat-label">Orders</span><span id="statOrders" class="stat-value">–</span></div>
+      <div class="stat"><span class="stat-label">Value locked in escrow</span><span id="statLocked" class="stat-value">–</span></div>
+      <div class="stat"><span class="stat-label">Completed</span><span id="statCompleted" class="stat-value">–</span></div>
+      <div class="stat"><span class="stat-label">Open disputes</span><span id="statDisputes" class="stat-value">–</span></div>
+    </section>
+
+    <div class="columns">
+      <!-- ============ Left column ============ -->
+      <aside class="side">
+        <!-- Create order -->
+        <section class="card" id="createCard">
+          <h2>New order <span class="h-note">Buyer</span></h2>
+          <p class="card-intro">Lock payment in the contract. The seller is paid in two stages: an upfront share on shipment, the rest when you confirm receipt.</p>
+          <form id="createForm" novalidate>
+            <label>Seller (farmer) address
+              <input id="fSeller" name="seller" class="mono" placeholder="0x…" autocomplete="off" required>
+            </label>
+            <label>Product
+              <input id="fProduct" name="product" maxlength="64" placeholder="e.g. Wheat 2t Grade A" required>
+              <span class="hint"><span id="productBytes">0</span>/64 bytes</span>
+            </label>
+            <div class="row">
+              <label>Amount (ETH)
+                <input id="fAmount" name="amount" type="number" min="0" step="0.0001" placeholder="0.002" required>
+              </label>
+              <label>Upfront on shipment
+                <select id="fUpfront" name="upfront">
+                  <option value="0">0%</option>
+                  <option value="10">10%</option>
+                  <option value="20">20%</option>
+                  <option value="30" selected>30%</option>
+                  <option value="40">40%</option>
+                  <option value="50">50%</option>
+                </select>
+              </label>
+            </div>
+            <label>Seller must ship within
+              <select id="fWindow" name="window">
+                <option value="300">5 minutes (demo)</option>
+                <option value="3600" selected>1 hour</option>
+                <option value="86400">1 day</option>
+                <option value="259200">3 days</option>
+                <option value="604800">7 days</option>
+              </select>
+            </label>
+            <p id="createError" class="form-error" role="alert"></p>
+            <button type="submit" class="btn btn-primary btn-block" id="createBtn">Lock funds &amp; create order</button>
+          </form>
+        </section>
+
+        <!-- Withdraw -->
+        <section class="card" id="withdrawCard">
+          <h2>Your escrow balance</h2>
+          <p class="card-intro">Payouts and refunds are credited here first (pull-payment). Withdraw them to your wallet.</p>
+          <div class="balance-line">
+            <span id="pendingAmount" class="big-number">–</span>
+            <button id="withdrawBtn" class="btn" disabled>Withdraw</button>
+          </div>
+        </section>
+
+        <!-- Verify document -->
+        <section class="card" id="verifyCard">
+          <h2>Verify a document</h2>
+          <p class="card-intro">Check that a shipping or inspection document matches the hash the seller anchored on-chain. The file never leaves your browser.</p>
+          <label>Order
+            <select id="vOrder"><option value="">Select an order…</option></select>
+          </label>
+          <label>Document file
+            <input id="vFile" type="file">
+          </label>
+          <p id="verifyResult" class="verify-result"></p>
+        </section>
+      </aside>
+
+      <!-- ============ Right column ============ -->
+      <section class="main-col">
+        <section class="card">
+          <div class="card-head">
+            <h2>Orders</h2>
+            <div class="tabs" role="tablist">
+              <button class="tab active" data-filter="all" role="tab">All</button>
+              <button class="tab" data-filter="buyer" role="tab">My purchases</button>
+              <button class="tab" data-filter="seller" role="tab">My sales</button>
+              <button class="tab" data-filter="disputes" role="tab">Disputes</button>
+            </div>
+          </div>
+          <div id="ordersList" class="orders">
+            <p class="empty">Loading orders…</p>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>Transaction history</h2>
+            <label class="inline-check"><input type="checkbox" id="historyMine"> Only mine</label>
+          </div>
+          <div class="table-wrap">
+            <table class="history">
+              <thead><tr><th>Time</th><th>Event</th><th>Order</th><th>Details</th><th>Tx</th></tr></thead>
+              <tbody id="historyBody"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <span>Contract <a id="contractLink" class="mono" target="_blank" rel="noopener"></a></span>
+    <span>Ethereum Sepolia testnet · test ETH only</span>
+    <span id="syncInfo" class="muted"></span>
+  </footer>
+
+  <!-- Dialogs -->
+  <dialog id="shipDialog" class="dialog">
+    <form method="dialog" id="shipForm">
+      <h3>Mark order <span id="shipOrderId"></span> as shipped</h3>
+      <p class="card-intro">Attach the shipping or quality-inspection document. Only its keccak-256 hash is stored on-chain.</p>
+      <label>Document file <input type="file" id="shipFile"></label>
+      <p class="or">— or —</p>
+      <label>Tracking / reference number <input id="shipText" placeholder="e.g. SF1234567890"></label>
+      <p class="hint mono" id="shipHash"></p>
+      <p id="shipError" class="form-error" role="alert"></p>
+      <div class="dialog-actions">
+        <button value="cancel" class="btn">Cancel</button>
+        <button id="shipConfirm" value="confirm" class="btn btn-primary">Confirm shipment</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="disputeDialog" class="dialog">
+    <form method="dialog" id="disputeForm">
+      <h3>Raise a dispute on order <span id="disputeOrderId"></span></h3>
+      <p class="card-intro">The arbiter will decide how the remaining escrowed funds are split.</p>
+      <label>Reason <textarea id="disputeReason" rows="3" maxlength="200" placeholder="e.g. Moisture 18% above 14% contract spec"></textarea></label>
+      <span class="hint"><span id="reasonBytes">0</span>/200 bytes</span>
+      <p id="disputeError" class="form-error" role="alert"></p>
+      <div class="dialog-actions">
+        <button value="cancel" class="btn">Cancel</button>
+        <button id="disputeConfirm" value="confirm" class="btn btn-danger">Raise dispute</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="resolveDialog" class="dialog">
+    <form method="dialog" id="resolveForm">
+      <h3>Resolve dispute on order <span id="resolveOrderId"></span></h3>
+      <p class="card-intro" id="resolveIntro"></p>
+      <label>Refund to buyer: <strong id="resolvePct">50</strong>%
+        <input type="range" id="resolveRange" min="0" max="100" step="5" value="50">
+      </label>
+      <p class="split" id="resolveSplit"></p>
+      <div class="dialog-actions">
+        <button value="cancel" class="btn">Cancel</button>
+        <button id="resolveConfirm" value="confirm" class="btn btn-primary">Submit ruling</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <script>window.APP_CONFIG = {{ config | tojson }};</script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: agri-escrow
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 60
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: CONTRACT_ADDRESS
+        value: 0x1A22A6d9DF7FF094CaACE803A3b57859354659eB
+      - key: DEPLOY_BLOCK
+        value: "11857854"
+      - key: RPC_URL
+        sync: false   # set the secret value in the Render dashboard

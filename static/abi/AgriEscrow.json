@@ -1,0 +1,691 @@
+[
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_arbiter",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_confirmWindow",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [],
+		"name": "ArbiterCannotTrade",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			}
+		],
+		"name": "claimAfterTimeout",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			}
+		],
+		"name": "claimRefund",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			}
+		],
+		"name": "confirmReceipt",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "ConfirmWindowClosed",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "ConfirmWindowOpen",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "seller",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "product",
+				"type": "string"
+			},
+			{
+				"internalType": "uint16",
+				"name": "upfrontBps",
+				"type": "uint16"
+			},
+			{
+				"internalType": "uint32",
+				"name": "shipWindow",
+				"type": "uint32"
+			}
+		],
+		"name": "createOrder",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "EmptyDocHash",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidAmount",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidArbiter",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidConfirmWindow",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidProduct",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidReason",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidSeller",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidShipWindow",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidSplit",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "docHash",
+				"type": "bytes32"
+			}
+		],
+		"name": "markShipped",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "NotArbiter",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NotBuyer",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NotSeller",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NothingToWithdraw",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "OrderNotFound",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "reason",
+				"type": "string"
+			}
+		],
+		"name": "raiseDispute",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "Reentrancy",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "ShipDeadlineNotReached",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "ShipDeadlinePassed",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "TransferFailed",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "UpfrontTooHigh",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "enum AgriEscrow.Status",
+				"name": "current",
+				"type": "uint8"
+			}
+		],
+		"name": "WrongStatus",
+		"type": "error"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "reason",
+				"type": "string"
+			}
+		],
+		"name": "DisputeRaised",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "buyerAmount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "sellerAmount",
+				"type": "uint256"
+			}
+		],
+		"name": "DisputeResolved",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "sellerAmount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "byTimeout",
+				"type": "bool"
+			}
+		],
+		"name": "OrderCompleted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "buyer",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "seller",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint16",
+				"name": "upfrontBps",
+				"type": "uint16"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint40",
+				"name": "shipDeadline",
+				"type": "uint40"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "product",
+				"type": "string"
+			}
+		],
+		"name": "OrderCreated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "buyerAmount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "rejectedBySeller",
+				"type": "bool"
+			}
+		],
+		"name": "OrderRefunded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes32",
+				"name": "docHash",
+				"type": "bytes32"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "upfrontReleased",
+				"type": "uint256"
+			}
+		],
+		"name": "OrderShipped",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			}
+		],
+		"name": "rejectOrder",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint16",
+				"name": "buyerBps",
+				"type": "uint16"
+			}
+		],
+		"name": "resolveDispute",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "withdraw",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "Withdrawn",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "arbiter",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			}
+		],
+		"name": "confirmDeadline",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "confirmWindow",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			}
+		],
+		"name": "getOrder",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "buyer",
+						"type": "address"
+					},
+					{
+						"internalType": "uint96",
+						"name": "amount",
+						"type": "uint96"
+					},
+					{
+						"internalType": "address",
+						"name": "seller",
+						"type": "address"
+					},
+					{
+						"internalType": "enum AgriEscrow.Status",
+						"name": "status",
+						"type": "uint8"
+					},
+					{
+						"internalType": "uint16",
+						"name": "upfrontBps",
+						"type": "uint16"
+					},
+					{
+						"internalType": "uint40",
+						"name": "shipDeadline",
+						"type": "uint40"
+					},
+					{
+						"internalType": "uint40",
+						"name": "createdAt",
+						"type": "uint40"
+					},
+					{
+						"internalType": "uint40",
+						"name": "shippedAt",
+						"type": "uint40"
+					},
+					{
+						"internalType": "uint96",
+						"name": "released",
+						"type": "uint96"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "docHash",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "string",
+						"name": "product",
+						"type": "string"
+					}
+				],
+				"internalType": "struct AgriEscrow.Order",
+				"name": "",
+				"type": "tuple"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "MAX_PRODUCT_LENGTH",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "MAX_REASON_LENGTH",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "MAX_SHIP_WINDOW",
+		"outputs": [
+			{
+				"internalType": "uint32",
+				"name": "",
+				"type": "uint32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "MAX_UPFRONT_BPS",
+		"outputs": [
+			{
+				"internalType": "uint16",
+				"name": "",
+				"type": "uint16"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "MIN_SHIP_WINDOW",
+		"outputs": [
+			{
+				"internalType": "uint32",
+				"name": "",
+				"type": "uint32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "orderCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "pendingWithdrawals",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
