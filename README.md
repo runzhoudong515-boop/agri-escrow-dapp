@@ -5,7 +5,7 @@ farm-produce trade. The buyer locks payment in a smart contract; the farmer is p
 in two stages (an upfront share on shipment, the balance on confirmed delivery).
 Timeouts protect each party, and a neutral arbiter settles disputes.
 
-- **Live app:** `[https://<your-service>.onrender.com](https://agri-escrow.onrender.com)`  ← replace after deploying
+- - **Live app:** https://agri-escrow.onrender.com
 - **Contract:** [`0x1A22A6d9DF7FF094CaACE803A3b57859354659eB`](https://sepolia.etherscan.io/address/0x1A22A6d9DF7FF094CaACE803A3b57859354659eB) (source verified on Etherscan)
 - **Deployment block:** 11857854
 
